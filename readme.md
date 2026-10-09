@@ -121,7 +121,7 @@ Resposta, `201 Created`:
 ```
 ### As planejadas
 | Verbo | Caminho proposto | O que vai fazer |
-|---|---|---|---|---|---|
+|---|---|---|
 | POST | /ocorrencias | Registrar uma ocorrência urbana. |
 | GET | /ocorrencias | Listar ocorrências cadastradas. |
 | GET | /ocorrencias/{id} | Consultar uma ocorrência específica. |
