@@ -8,15 +8,15 @@ async function main() {
   try {
     // Inicializa a conexão com o banco de dados
     await AppDataSource.initialize();
-    console.log("📦 Conexão com o Banco de Dados estabelecida com sucesso!");
+    console.log("Conexão com o Banco de Dados estabelecida com sucesso!");
 
     // Inicia o servidor Express
     app.listen(PORT, () => {
-      console.log(`🔥 Servidor rodando na porta ${PORT}`);
-      console.log(`📄 Documentação disponível em http://localhost:${PORT}/api-docs`);
+      console.log(`Servidor rodando na porta ${PORT}`);
+      console.log(`Documentação disponível em http://localhost:${PORT}/api-docs`);
     });
   } catch (error) {
-    console.error("❌ Erro ao iniciar o servidor:", error);
+    console.error("Erro ao iniciar o servidor:", error);
   }
 }
 
