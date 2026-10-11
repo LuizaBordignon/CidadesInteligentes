@@ -12,11 +12,11 @@ async function main() {
 
     // Inicia o servidor Express
     app.listen(PORT, () => {
-      console.log(`🔥 Servidor rodando na porta ${PORT}`);
-      console.log(`📄 Documentação disponível em http://localhost:${PORT}/api-docs`);
+      console.log(`Servidor rodando na porta ${PORT}`);
+      console.log(`Documentação disponível em http://localhost:${PORT}/api-docs`);
     });
   } catch (error) {
-    console.error("❌ Erro ao iniciar o servidor:", error);
+    console.error("Erro ao iniciar o servidor:", error);
   }
 }
 
