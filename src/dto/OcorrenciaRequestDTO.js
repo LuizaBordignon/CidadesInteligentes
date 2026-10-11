@@ -1,29 +1,53 @@
 // CAMADA: DTO
-// RESPONSABILIDADE: Definir e validar o formato dos dados enviados pelo cliente ao criar uma ocorrência.
-// REGRAS: Garantir que os campos obrigatórios venham preenchidos e que o status não seja enviado (regra R1).
-// ROTAS ATENDIDAS: POST /ocorrencias
+// RESPONSABILIDADE: Definir e validar o formato dos dados enviados pelo cliente nas rotas de ocorrência.
+// REGRAS: Campos obrigatórios preenchidos; o status NÃO é aceito na criação (regra R1: a ocorrência nasce ABERTA).
+// ROTAS ATENDIDAS: POST /ocorrencias, GET /ocorrencias/:id, PATCH /ocorrencias/:id/status
 // SITUAÇÃO: implementada.
 
-export class OcorrenciaRequestDTO {
-    constructor(dados) {
-        this.titulo = dados.titulo;
-        this.descricao = dados.descricao;
-        this.endereco = dados.endereco;
-        this.categoria_id = dados.categoria_id;
-    }
+import { z } from "zod";
+import { StatusOcorrencia } from "../model/StatusOcorrencia.js";
 
-    validar() {
-        if (!this.titulo || this.titulo.trim() === ''){
-            throw new Error('O título é obrigatório.');
-        }
-        if (!this.descricao || this.descricao.trim() === ''){
-            throw new Error('A descrição é obrigatória.');
-        }
-        if (!this.endereco || this.endereco.trim() === ''){
-            throw new Error('O endereço é obrigatório.');
-        }
-        if (!this.categoria_id) {
-            throw new Error('A categoria é obrigatória.');
-        }
-    }
-}
+const textoObrigatorio = (nomeDoCampo, tamanhoMaximo) =>
+  z
+    .string({
+      required_error: `${nomeDoCampo} é obrigatório.`,
+      invalid_type_error: `${nomeDoCampo} deve ser um texto.`,
+    })
+    .trim()
+    .min(1, `${nomeDoCampo} não pode estar vazio.`)
+    .max(tamanhoMaximo, `${nomeDoCampo} deve ter no máximo ${tamanhoMaximo} caracteres.`);
+
+// Corpo do POST /ocorrencias. Campos extras (como "status") são descartados pelo Zod.
+export const OcorrenciaRequestSchema = z.object({
+  titulo: textoObrigatorio("O título", 150),
+  descricao: z
+    .string({
+      required_error: "A descrição é obrigatória.",
+      invalid_type_error: "A descrição deve ser um texto.",
+    })
+    .trim()
+    .min(1, "A descrição não pode estar vazia."),
+  endereco: textoObrigatorio("O endereço", 255),
+  categoria_id: z
+    .number({
+      required_error: "A categoria é obrigatória.",
+      invalid_type_error: "A categoria deve ser um número (id).",
+    })
+    .int("A categoria deve ser um número inteiro.")
+    .positive("A categoria deve ser um id válido."),
+});
+
+// Parâmetro :id da URL (chega como texto, vira número).
+export const OcorrenciaIdSchema = z.coerce
+  .number({ invalid_type_error: "O id deve ser um número." })
+  .int("O id deve ser um número inteiro.")
+  .positive("O id deve ser positivo.");
+
+// Corpo do PATCH /ocorrencias/:id/status.
+export const OcorrenciaStatusRequestSchema = z.object({
+  status: z.enum(Object.values(StatusOcorrencia), {
+    required_error: "O status é obrigatório.",
+    invalid_type_error: "O status deve ser um texto.",
+    message: `O status deve ser um destes: ${Object.values(StatusOcorrencia).join(", ")}.`,
+  }),
+});

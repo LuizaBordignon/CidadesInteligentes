@@ -7,17 +7,16 @@
 import { OcorrenciaResponseDTO } from "../dto/OcorrenciaResponseDTO.js";
 
 export class OcorrenciaMapper {
-    paraPersistencia(requestDTO) {
-        return {
-            titulo: requestDTO.titulo,
-            descricao: requestDTO.descricao,
-            endereco: requestDTO.endereco,
-            dataCriacao: new Date(),
-        }
+  paraPersistencia(dadosValidados) {
+    return {
+      titulo: dadosValidados.titulo,
+      descricao: dadosValidados.descricao,
+      endereco: dadosValidados.endereco,
+      categoria_id: dadosValidados.categoria_id,
     };
+  }
 
-    paraResposta(ocorrenciaEntity) {
-        return new OcorrenciaResponseDTO(ocorrenciaEntity);
-    }
-
+  paraResposta(ocorrenciaEntity) {
+    return new OcorrenciaResponseDTO(ocorrenciaEntity);
+  }
 }

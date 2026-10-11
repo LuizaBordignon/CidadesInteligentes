@@ -17,7 +17,7 @@ export class OcorrenciaRepository {
   async buscarPorId(id) {
     return await this.repository.findOne({
       where: { id },
-      relations: ['categoria', 'equipe'],
+      relations: ['categoria'],
     });
   }
 

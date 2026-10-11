@@ -16,14 +16,13 @@ export class OcorrenciaService {
     this.categoriaService = categoriaService;
   }
 
-  async criar(requestDTO) {
-    requestDTO.validar();
-
-    await this.categoriaService.buscarEntidadePorId(requestDTO.categoria_id);
+  async criar(dadosValidados) {
+    // Lança CategoriaNaoEncontradaError (404) se a categoria não existir.
+    await this.categoriaService.buscarPorId(dadosValidados.categoria_id);
 
     const duplicada = await this.ocorrenciaRepository.buscarAbertaPorEnderecoECategoria(
-      requestDTO.endereco,
-      requestDTO.categoria_id
+      dadosValidados.endereco,
+      dadosValidados.categoria_id
     );
 
     if (duplicada) {
@@ -32,12 +31,13 @@ export class OcorrenciaService {
       );
     }
 
-    const dadosParaSalvar = this.ocorrenciaMapper.paraPersistencia(requestDTO);
+    const dadosParaSalvar = this.ocorrenciaMapper.paraPersistencia(dadosValidados);
     dadosParaSalvar.status = StatusOcorrencia.ABERTA;
 
     const salva = await this.ocorrenciaRepository.criar(dadosParaSalvar);
     return this.ocorrenciaMapper.paraResposta(salva);
   }
+
 
   async listar() {
     const ocorrencias = await this.ocorrenciaRepository.listar();
