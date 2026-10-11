@@ -50,13 +50,14 @@ aplicativo móvel, integração com sensores urbanos em tempo real, geolocaliza�
 
 ## Tecnologias
 
-| O quê | Qual |
-|---|---|
-| Linguagem | JavaScript |
-| Runtime | Node.js |
-| Banco de dados | PostgreSQL 16, em Docker |
-| Migrations | Flyway |
-| Documentação da API | springdoc-openapi (Swagger UI) |
+| O quê               | Qual                                   |
+| ------------------- | -------------------------------------- |
+| Linguagem           | JavaScript                             |
+| Runtime             | Node.js 22                             |
+| Framework           | Express 5                              |
+| Banco de dados      | PostgreSQL 16, em Docker               |
+| Migrations          | Knex                                   |
+| Documentação da API | swagger-ui-express + swagger-jsdoc     |
 
 ## Arquitetura
 
