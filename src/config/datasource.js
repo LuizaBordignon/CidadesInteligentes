@@ -10,7 +10,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER || "postgres",
   password: process.env.DB_PASSWORD || "postgres",
   database: process.env.DB_NAME || "cidades_inteligentes",
-  synchronize: false, // Conforme o guia: o banco só muda por migration!
+  synchronize: false,
   logging: true,
   entities: ["src/model/**/*.js"],
   migrations: ["db/migration/**/*.js"],

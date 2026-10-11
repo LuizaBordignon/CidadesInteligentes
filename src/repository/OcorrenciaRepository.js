@@ -23,7 +23,7 @@ export class OcorrenciaRepository {
 
   async listar() {
     return await this.repository.find({
-      relations: ['categoria', 'equipe'],
+      relations: ["categoria"]
     });
   }
 

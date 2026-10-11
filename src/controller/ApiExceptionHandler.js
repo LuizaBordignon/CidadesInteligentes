@@ -23,7 +23,7 @@ export function ApiExceptionHandler(err, req, res, next) {
   }
 
   // 3. Erro de Recurso Não Encontrado (vira 404)
-  if (err instanceof RecursoNaoEnconradoError) {
+  if (err instanceof RecursoNaoEncontradoError) {
     const erroDTO = new ErroDTO(404, "Não Encontrado", err.message, path);
     return res.status(404).json(erroDTO);
   }

@@ -39,10 +39,6 @@ export const OcorrenciaSchema = new EntitySchema({
       type: 'int',
       nullable: false,
     },
-    equipe_id: {
-      type: 'int',
-      nullable: true, // Pode ser nula no começo, pois nenhum chamado tem equipe atribuída ainda
-    },
   },
   relations: {
     categoria: {
@@ -50,12 +46,6 @@ export const OcorrenciaSchema = new EntitySchema({
       target: 'Categoria',
       joinColumn: { name: 'categoria_id' },
       nullable: false,
-    },
-    equipe: {
-      type: 'many-to-one',
-      target: 'Equipe',
-      joinColumn: { name: 'equipe_id' },
-      nullable: true,
     },
   },
 });

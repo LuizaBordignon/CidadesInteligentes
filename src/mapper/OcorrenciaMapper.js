@@ -4,7 +4,7 @@
 // ROTAS ATENDIDAS: As rotas de ocorrências.
 // SITUAÇÃO: implementada.
 
-import { OcorrenciaResponseDTO } from "../dto/OcorrenciaReponseDTO"
+import { OcorrenciaResponseDTO } from "../dto/OcorrenciaResponseDTO.js";
 
 export class OcorrenciaMapper {
     paraPersistencia(requestDTO) {

@@ -8,7 +8,7 @@ async function main() {
   try {
     // Inicializa a conexão com o banco de dados
     await AppDataSource.initialize();
-    console.log("📦 Conexão com o Banco de Dados estabelecida com sucesso!");
+    console.log("Conexão com o Banco de Dados estabelecida com sucesso!");
 
     // Inicia o servidor Express
     app.listen(PORT, () => {
