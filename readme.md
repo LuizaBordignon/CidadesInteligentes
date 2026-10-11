@@ -46,6 +46,7 @@ Problemas urbanos, como lâmpadas queimadas, acúmulo de lixo e semáforos com d
 | R1  | Toda ocorrência nova deve iniciar com o status ABERTA.                  | `src/service/OcorrenciaService.js` (método `criar`)                                              | `POST /ocorrencias`             |
 | R2  | Uma ocorrência só pode passar para EM_ATENDIMENTO se estiver ABERTA.    | `src/service/OcorrenciaService.js` (método `atualizarStatus`) e `src/model/StatusOcorrencia.js` | `PATCH /ocorrencias/:id/status` |
 | R3  | Uma ocorrência só pode passar para CONCLUIDA se estiver EM_ATENDIMENTO. | `src/service/OcorrenciaService.js` (método `atualizarStatus`) e `src/model/StatusOcorrencia.js` | `PATCH /ocorrencias/:id/status` |
+| R4  | Não pode existir mais de uma ocorrência ABERTA com o mesmo endereço e a mesma categoria. Assim a mesma lâmpada queimada não gera vários chamados. | `src/service/OcorrenciaService.js` (método `criar`) e `src/repository/OcorrenciaRepository.js` (consulta de ocorrência aberta) | `POST /ocorrencias` |
 
 **Fora do escopo:** aplicativo móvel, integração com sensores urbanos em tempo real, geolocalização automática e integração direta com sistemas da prefeitura. Também não fazem parte desta etapa as rotas `PUT` e `DELETE` e o frontend.
 
@@ -181,7 +182,7 @@ O cliente não envia o campo `status`. Ele é definido pelo sistema (R1).
 
 | Verbo | Caminho proposto        | O que vai fazer                                        | Regra   |
 | ----- | ----------------------- | ------------------------------------------------------ | ------- |
-| POST  | /ocorrencias            | Registrar uma ocorrência urbana.                       | R1      |
+| POST  | /ocorrencias            | Registrar uma ocorrência urbana.                       | R1 e R4 |
 | GET   | /ocorrencias            | Listar ocorrências cadastradas.                        | Nenhuma |
 | GET   | /ocorrencias/:id        | Consultar uma ocorrência específica.                   | Nenhuma |
 | PATCH | /ocorrencias/:id/status | Atualizar o status conforme as regras de negócio.      | R2 e R3 |
@@ -210,6 +211,8 @@ Todo erro sai no mesmo formato. Este é o `400` de uma regra de negócio violada
   "campos": []
 }
 ```
+
+A violação de R4 também devolve `400`, com a mensagem `R4: já existe uma ocorrência ABERTA com este endereço e esta categoria`.
 
 Um campo inválido também devolve `400`, com a lista `campos` dizendo qual campo corrigir. Um id que não existe devolve `404`. Um erro inesperado devolve `500`, sem expor detalhes internos.
 
@@ -244,7 +247,7 @@ Para parar: `Ctrl+C` na API e `docker compose stop` no banco. Para apagar o banc
 | ------------ | --------------------------------------------------------------------------------------------------------- |
 | Desenho      | Em andamento: problema, regras e arquitetura neste README; modelo e contrato em `docs/`.                  |
 | Estrutura    | Planejada: as 3 entidades ainda não têm migration, entidade, Repository, DTOs, Mapper, Service e Controller. |
-| API e regras | Não iniciadas: a API simples e as regras R1, R2 e R3 ainda não estão implementadas.                       |
+| API e regras | Não iniciadas: a API simples e as regras R1, R2, R3 e R4 ainda não estão implementadas.                       |
 
 **Ainda não funciona:** todas as rotas planejadas.
 
@@ -276,8 +279,8 @@ Os critérios da revisão citam nomes do Java e do Spring. Como o projeto é em 
 | P4 DTOs                             | Cada entidade tem DTO de entrada, com validação Zod, e DTO de saída. O Controller e o JSON só usam DTO.               |
 | P5 Estrutura completa e documentada | Cada entidade tem Repository, Mapper, Service e Controller, ligados pelo construtor em `src/app.js`. Toda classe tem comentário no topo. O mapa da estrutura acima bate com as classes. |
 | P6 API simples                      | `POST /ocorrencias`, `GET /ocorrencias` e `GET /ocorrencias/:id`. Campo inválido devolve `400`; id inexistente devolve `404`, com `OcorrenciaNaoEncontradaError` lançada no Service. |
-| P7 Regras de negócio implementadas  | R1, R2 e R3 ficam em `OcorrenciaService`. Cada violação lança `RegraDeNegocioError`, e a API devolve `400` com a regra na mensagem. |
-| P8 Regras que atendem ao tema       | As regras controlam o ciclo de atendimento de uma ocorrência urbana: ABERTA, EM_ATENDIMENTO e CONCLUIDA.              |
+| P7 Regras de negócio implementadas  | R1, R2, R3 e R4 ficam em `OcorrenciaService`. Cada violação lança `RegraDeNegocioError`, e a API devolve `400` com a regra na mensagem. |
+| P8 Regras que atendem ao tema       | R1 a R3 controlam o ciclo de atendimento de uma ocorrência urbana. R4 evita chamados duplicados para o mesmo problema no mesmo lugar. |
 | P9 Código igual ao desenho          | Entidades, colunas e rotas seguem [docs/modelo-de-dominio.md](docs/modelo-de-dominio.md) e [docs/contrato-da-api.md](docs/contrato-da-api.md). |
 | P10 README                          | Este arquivo tem todas as seções, diz o que funciona e o que não funciona e explica como subir o projeto.             |
 
