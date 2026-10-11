@@ -5,6 +5,7 @@
 // SITUAÇÃO: implementada.
 
 import { Router } from 'express';
+import { OcorrenciaRequestDTO } from '../dto/OcorrenciaRequestDTO.js';
 
 export class OcorrenciaController {
     constructor(ocorrenciaService) {
@@ -16,7 +17,8 @@ export class OcorrenciaController {
     configurarRotas() {
         this.router.post('/', async (req, res, next) => {
             try {
-                const novaOcorrencia = await this.ocorrenciaService.criar(req.body);
+                const requestDTO = new OcorrenciaRequestDTO(req.body);
+                const novaOcorrencia = await this.ocorrenciaService.criar(requestDTO);
                 return res.status(201).json(novaOcorrencia);
             } catch (erro) {
                 next(erro);

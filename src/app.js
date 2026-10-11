@@ -9,10 +9,15 @@ import { OcorrenciaRepository } from './repository/OcorrenciaRepository.js';
 import { OcorrenciaMapper } from './mapper/OcorrenciaMapper.js';
 import { OcorrenciaService } from './service/OcorrenciaService.js';
 import { OcorrenciaController } from './controller/OcorrenciaController.js';
+import swaggerUi from "swagger-ui-express";
+import { openapi } from "./docs/openapi.js";
 
 const app = express();
 
 app.use(express.json());
+
+app.get("/api-docs.json", (req, res) => res.json(openapi));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapi));
 
 // Rota de teste simples
 app.get("/", (req, res) => {

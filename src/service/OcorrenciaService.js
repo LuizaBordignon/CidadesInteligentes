@@ -39,7 +39,6 @@ export class OcorrenciaService {
     return this.ocorrenciaMapper.paraResposta(salva);
   }
 
-
   async listar() {
     const ocorrencias = await this.ocorrenciaRepository.listar();
     return ocorrencias.map((occ) => this.ocorrenciaMapper.paraResposta(occ));
@@ -48,7 +47,7 @@ export class OcorrenciaService {
   async buscarPorId(id) {
     const ocorrencia = await this.ocorrenciaRepository.buscarPorId(id);
     if (!ocorrencia) {
-      throw new OcorrenciaNaoEncontradaError(`Ocorrência com ID ${id} não encontrada.`);
+      throw new RecursoNaoEncontradoError(`Ocorrência com ID ${id} não encontrada.`);
     }
     return this.ocorrenciaMapper.paraResposta(ocorrencia);
   }
@@ -56,7 +55,7 @@ export class OcorrenciaService {
   async atualizarStatus(id, novoStatus) {
     const ocorrencia = await this.ocorrenciaRepository.buscarPorId(id);
     if (!ocorrencia) {
-      throw new OcorrenciaNaoEncontradaError(`Ocorrência com ID ${id} não encontrada.`);
+      throw new RecursoNaoEncontradoError(`Ocorrência com ID ${id} não encontrada.`);
     }
 
     const ehPermitida = ValidadorStatusOcorrencia.ehPermitida(
