@@ -90,7 +90,9 @@ Controller ──DTO──> Service ──entidade──> Repository ──SQL�
 cidadeativa/
 ├── README.md                     # problema, regras, mapa da estrutura, como executar
 ├── docker-compose.yml            # PostgreSQL
+├── .env
 ├── .env.example
+├── package-lock.json
 ├── package.json
 ├── docs/                         # o desenho
 │   ├── modelo-de-dominio.md
@@ -100,6 +102,7 @@ cidadeativa/
 │   ├── V1__criar_categorias.js
 │   ├── V2__criar_equipes.js
 │   └── V3__criar_ocorrencias.js
+├── node_modules/
 └── src/                          # o código
     ├── server.js                 # sobe o servidor
     ├── app.js                    # monta o Express e liga as classes pelo construtor
