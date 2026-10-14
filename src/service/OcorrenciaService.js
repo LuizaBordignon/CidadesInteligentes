@@ -70,7 +70,9 @@ export class OcorrenciaService {
     }
 
     ocorrencia.status = novoStatus;
+    console.log('teste new branch')
     const atualizada = await this.ocorrenciaRepository.salvar(ocorrencia);
     return this.ocorrenciaMapper.paraResposta(atualizada);
   }
 }
+
