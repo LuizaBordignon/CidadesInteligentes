@@ -64,13 +64,24 @@ export class OcorrenciaService {
     );
 
     if (!ehPermitida) {
+      if (novoStatus === StatusOcorrencia.EM_ATENDIMENTO) {
+        throw new RegraDeNegocioError(
+            `R2: uma ocorrência só pode passar para EM_ATENDIMENTO se estiver ABERTA (status atual: ${ocorrencia.status}).`
+        );
+      }
+
+      if (novoStatus === StatusOcorrencia.CONCLUIDA) {
+        throw new RegraDeNegocioError(
+            `R3: Uma ocorrência só pode passar para CONCLUIDA se estiver EM_ATENDIMENTO (status atual: ${ocorrencia.status}).`
+        );
+      }
+
       throw new RegraDeNegocioError(
-        `Transição de status inválida: não é permitido mudar de '${ocorrencia.status}' para '${novoStatus}'.`
+          `Transição de status inválida: não é permitido mudar de '${ocorrencia.status}' para '${novoStatus}'.`
       );
     }
 
     ocorrencia.status = novoStatus;
-    console.log('teste new branch')
     const atualizada = await this.ocorrenciaRepository.salvar(ocorrencia);
     return this.ocorrenciaMapper.paraResposta(atualizada);
   }

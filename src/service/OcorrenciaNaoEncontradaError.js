@@ -1,6 +1,6 @@
 // CAMADA: Service
 // RESPONSABILIDADE: Personaliza o erro caso Ocorrencia não existir com respectivo Id.
-// REGRAS: Caso classe seja convocada, personaliza o erro 404 genérico
+// REGRAS: Nenhuma. Apenas representa o erro 404 de ocorrência inexistente
 // ROTAS ATENDIDAS: As rotas de /ocorrencias.
 // SITUAÇÃO: implementada.
 
