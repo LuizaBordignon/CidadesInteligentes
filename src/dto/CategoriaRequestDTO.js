@@ -12,3 +12,8 @@ export const CategoriaRequestSchema = z.object({
     invalid_type_error: "O nome deve ser um texto.",
   }).min(1, "O nome não pode estar vazio."),
 });
+
+export const CategoriaIdSchema = z.coerce
+  .number({ invalid_type_error: "O id deve ser um número." })
+  .int("O id deve ser um número inteiro.")
+  .positive("O id deve ser positivo.");

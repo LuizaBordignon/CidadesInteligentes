@@ -4,7 +4,27 @@
 // ROTAS ATENDIDAS: Nenhuma diretamente.
 // SITUAÇÃO: implementada.
 
-import { AppDataSource } from "../config/datasource.js";
 import { CategoriaSchema } from "../model/Categoria.js";
 
-export const CategoriaRepository = AppDataSource.getRepository(CategoriaSchema);
+export class CategoriaRepository {
+  constructor(dataSource) {
+    this.repository = dataSource.getRepository(CategoriaSchema);
+  }
+
+  async criar(categoriaData) {
+    const categoria = this.repository.create(categoriaData);
+    return await this.repository.save(categoria);
+  }
+
+  async listar() {
+    return await this.repository.find();
+  }
+
+  async buscarPorId(id) {
+    return await this.repository.findOneBy({ id });
+  }
+
+  async buscarPorNome(nome) {
+    return await this.repository.findOneBy({ nome });
+  }
+}

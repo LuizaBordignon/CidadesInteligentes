@@ -12,6 +12,11 @@ import { ZodError } from "zod";
 export function ApiExceptionHandler(err, req, res, next) {
   const path = req.originalUrl;
 
+  if (err.type === "entity.parse.failed") {
+    const erroDTO = new ErroDTO(400, "JSON Inválido", "O corpo da requisição não é um JSON válido.", path);
+    return res.status(400).json(erroDTO);
+  }
+
   // 1. Erro de validação do Zod (vira 400 com os campos)
   if (err instanceof ZodError) {
     const fields = err.errors.map((e) => ({

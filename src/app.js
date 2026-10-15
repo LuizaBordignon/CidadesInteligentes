@@ -1,9 +1,12 @@
 import express from "express";
 
-import categoriaController from "./controller/CategoriaController.js";
 import { ApiExceptionHandler } from "./controller/ApiExceptionHandler.js";
 import { AppDataSource } from "./config/datasource.js";
+
+import { CategoriaRepository } from "./repository/CategoriaRepository.js";
+import { CategoriaMapper } from "./mapper/CategoriaMapper.js";
 import { CategoriaService } from "./service/CategoriaService.js";
+import { CategoriaController } from "./controller/CategoriaController.js";
 
 import { EquipeRepository } from "./repository/EquipeRepository.js";
 import { EquipeMapper } from "./mapper/EquipeMapper.js";
@@ -30,8 +33,11 @@ app.get("/", (req, res) => {
 });
 
 // ===== CATEGORIA =====
-app.use("/categorias", categoriaController);
-const categoriaService = new CategoriaService();
+const categoriaRepository = new CategoriaRepository(AppDataSource);
+const categoriaMapper = new CategoriaMapper();
+const categoriaService = new CategoriaService(categoriaRepository, categoriaMapper);
+const categoriaController = new CategoriaController(categoriaService);
+app.use("/categorias", categoriaController.router);
 
 // ===== EQUIPE (montada: sem rotas ativas nesta etapa) =====
 const equipeRepository = new EquipeRepository(AppDataSource);

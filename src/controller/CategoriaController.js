@@ -5,43 +5,47 @@
 // SITUAÇÃO: implementada.
 
 import { Router } from "express";
-import { CategoriaService } from "../service/CategoriaService.js";
-import { CategoriaRequestSchema } from "../dto/CategoriaRequestDTO.js";
+import { CategoriaRequestSchema, CategoriaIdSchema } from "../dto/CategoriaRequestDTO.js";
 
-const router = Router();
-const service = new CategoriaService();
-
-// POST /categorias
-router.post("/", async (req, res, next) => {
-  try {
-    // Valida os dados usando o Zod
-    const dadosValidados = CategoriaRequestSchema.parse(req.body);
-    const novaCategoria = await service.criar(dadosValidados);
-    return res.status(201).json(novaCategoria);
-  } catch (error) {
-    next(error);
+export class CategoriaController {
+  constructor(categoriaService) {
+    this.router = Router();
+    this.categoriaService = categoriaService;
+    this.configurarRotas();
   }
-});
 
-// GET /categorias
-router.get("/", async (req, res, next) => {
-  try {
-    const categorias = await service.listar();
-    return res.json(categorias);
-  } catch (error) {
-    next(error);
+  configurarRotas() {
+    // POST /categorias
+    this.router.post("/", async (req, res, next) => {
+      try {
+        // Valida os dados usando o Zod
+        const dadosValidados = CategoriaRequestSchema.parse(req.body);
+        const novaCategoria = await this.categoriaService.criar(dadosValidados);
+        return res.status(201).json(novaCategoria);
+      } catch (error) {
+        next(error);
+      }
+    });
+
+    // GET /categorias
+    this.router.get("/", async (req, res, next) => {
+      try {
+        const categorias = await this.categoriaService.listar();
+        return res.json(categorias);
+      } catch (error) {
+        next(error);
+      }
+    });
+
+    // GET /categorias/:id
+    this.router.get("/:id", async (req, res, next) => {
+      try {
+        const id = CategoriaIdSchema.parse(req.params.id);
+        const categoria = await this.categoriaService.buscarPorId(id);
+        return res.json(categoria);
+      } catch (error) {
+        next(error);
+      }
+    });
   }
-});
-
-// GET /categorias/:id
-router.get("/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const categoria = await service.buscarPorId(id);
-    return res.json(categoria);
-  } catch (error) {
-    next(error);
-  }
-});
-
-export default router;
+}

@@ -4,34 +4,36 @@
 // ROTAS ATENDIDAS: /categorias
 // SITUAÇÃO: implementada.
 
-import { CategoriaRepository } from "../repository/CategoriaRepository.js";
 import { CategoriaNaoEncontradaError } from "./CategoriaNaoEncontradaError.js";
-import { CategoriaMapper } from "../mapper/CategoriaMapper.js";
 import { RegraDeNegocioError } from "./RegraDeNegocioError.js";
 
 export class CategoriaService {
+  constructor(categoriaRepository, categoriaMapper) {
+    this.categoriaRepository = categoriaRepository;
+    this.categoriaMapper = categoriaMapper;
+  }
+
   async criar(data) {
     // Exemplo de regra de negócio: verificar se já existe uma categoria com o mesmo nome
-    const existente = await CategoriaRepository.findOneBy({ nome: data.nome });
+    const existente = await this.categoriaRepository.buscarPorNome(data.nome);
     if (existente) {
       throw new RegraDeNegocioError("Já existe uma categoria cadastrada com este nome.");
     }
 
-    const novaCategoria = CategoriaRepository.create(data);
-    const salva = await CategoriaRepository.save(novaCategoria);
-    return CategoriaMapper.toResponse(salva);
+    const salva = await this.categoriaRepository.criar(data);
+    return this.categoriaMapper.toResponse(salva);
   }
 
   async listar() {
-    const categorias = await CategoriaRepository.find();
-    return CategoriaMapper.toResponseList(categorias);
+    const categorias = await this.categoriaRepository.listar();
+    return this.categoriaMapper.toResponseList(categorias);
   }
 
   async buscarPorId(id) {
-    const categoria = await CategoriaRepository.findOneBy({ id: Number(id) });
+    const categoria = await this.categoriaRepository.buscarPorId(id);
     if (!categoria) {
       throw new CategoriaNaoEncontradaError(id);
     }
-    return CategoriaMapper.toResponse(categoria);
+    return this.categoriaMapper.toResponse(categoria);
   }
 }
