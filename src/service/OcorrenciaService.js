@@ -6,8 +6,8 @@
 // SITUAÇÃO: implementada.
 
 import { RegraDeNegocioError } from './RegraDeNegocioError.js';
-import { RecursoNaoEncontradoError } from './RecursoNaoEncontradoError.js';
 import { StatusOcorrencia, ValidadorStatusOcorrencia } from '../model/StatusOcorrencia.js';
+import {OcorrenciaNaoEncontradaError} from "./OcorrenciaNaoEncontradaError.js";
 
 export class OcorrenciaService {
   constructor(ocorrenciaRepository, ocorrenciaMapper, categoriaService) {
@@ -47,7 +47,7 @@ export class OcorrenciaService {
   async buscarPorId(id) {
     const ocorrencia = await this.ocorrenciaRepository.buscarPorId(id);
     if (!ocorrencia) {
-      throw new RecursoNaoEncontradoError(`Ocorrência com ID ${id} não encontrada.`);
+      throw new OcorrenciaNaoEncontradaError(id);
     }
     return this.ocorrenciaMapper.paraResposta(ocorrencia);
   }
@@ -55,7 +55,7 @@ export class OcorrenciaService {
   async atualizarStatus(id, novoStatus) {
     const ocorrencia = await this.ocorrenciaRepository.buscarPorId(id);
     if (!ocorrencia) {
-      throw new RecursoNaoEncontradoError(`Ocorrência com ID ${id} não encontrada.`);
+      throw new OcorrenciaNaoEncontradaError(id);
     }
 
     const ehPermitida = ValidadorStatusOcorrencia.ehPermitida(
