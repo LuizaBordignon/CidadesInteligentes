@@ -1,3 +1,9 @@
+// CAMADA: DTO
+// RESPONSABILIDADE: Validar e estruturar os dados enviados pelo cliente ao criar uma categoria.
+// REGRAS: O campo nome é obrigatório.
+// ROTAS ATENDIDAS: POST /categorias
+// SITUAÇÃO: implementada.
+
 import { z } from "zod";
 
 export const CategoriaRequestSchema = z.object({

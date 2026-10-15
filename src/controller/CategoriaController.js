@@ -1,3 +1,9 @@
+// CAMADA: Controller
+// RESPONSABILIDADE: Gerenciar os endpoints HTTP para o recurso de categorias.
+// REGRAS: Validação de entrada via Zod e tratamento de erros via next().
+// ROTAS ATENDIDAS: POST /categorias, GET /categorias, GET /categorias/:id
+// SITUAÇÃO: implementada.
+
 import { Router } from "express";
 import { CategoriaService } from "../service/CategoriaService.js";
 import { CategoriaRequestSchema } from "../dto/CategoriaRequestDTO.js";

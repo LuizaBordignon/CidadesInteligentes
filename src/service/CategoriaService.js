@@ -1,3 +1,9 @@
+// CAMADA: Service
+// RESPONSABILIDADE: Conter as regras de negócio relacionadas às categorias.
+// REGRAS: Impedir cadastro de categorias com nomes duplicados.
+// ROTAS ATENDIDAS: /categorias
+// SITUAÇÃO: implementada.
+
 import { CategoriaRepository } from "../repository/CategoriaRepository.js";
 import { CategoriaNaoEncontradaError } from "./CategoriaNaoEncontradaError.js";
 import { CategoriaMapper } from "../mapper/CategoriaMapper.js";

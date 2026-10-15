@@ -1,3 +1,9 @@
+// CAMADA: Controller
+// RESPONSABILIDADE: Middleware global para interceptar e traduzir todos os erros para o formato padrão.
+// REGRAS: ZodError e RegraDeNegocioError viram 400, RecursoNaoEncontradoError vira 404, outros viram 500.
+// ROTAS ATENDIDAS: Todas as rotas da API.
+// SITUAÇÃO: implementada.
+
 import { ErroDTO } from "../dto/ErroDTO.js";
 import { RegraDeNegocioError } from "../service/RegraDeNegocioError.js";
 import { RecursoNaoEncontradoError } from "../service/RecursoNaoEncontradoError.js";
