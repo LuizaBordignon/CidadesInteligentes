@@ -6,8 +6,8 @@
 // SITUAÇÃO: implementada.
 
 import { RegraDeNegocioError } from './RegraDeNegocioError.js';
-import { RecursoNaoEncontradoError } from './RecursoNaoEncontradoError.js';
 import { StatusOcorrencia, ValidadorStatusOcorrencia } from '../model/StatusOcorrencia.js';
+import {OcorrenciaNaoEncontradaError} from "./OcorrenciaNaoEncontradaError.js";
 
 export class OcorrenciaService {
   constructor(ocorrenciaRepository, ocorrenciaMapper, categoriaService) {
@@ -47,7 +47,7 @@ export class OcorrenciaService {
   async buscarPorId(id) {
     const ocorrencia = await this.ocorrenciaRepository.buscarPorId(id);
     if (!ocorrencia) {
-      throw new RecursoNaoEncontradoError(`Ocorrência com ID ${id} não encontrada.`);
+      throw new OcorrenciaNaoEncontradaError(id);
     }
     return this.ocorrenciaMapper.paraResposta(ocorrencia);
   }
@@ -55,7 +55,7 @@ export class OcorrenciaService {
   async atualizarStatus(id, novoStatus) {
     const ocorrencia = await this.ocorrenciaRepository.buscarPorId(id);
     if (!ocorrencia) {
-      throw new RecursoNaoEncontradoError(`Ocorrência com ID ${id} não encontrada.`);
+      throw new OcorrenciaNaoEncontradaError(id);
     }
 
     const ehPermitida = ValidadorStatusOcorrencia.ehPermitida(
@@ -64,8 +64,20 @@ export class OcorrenciaService {
     );
 
     if (!ehPermitida) {
+      if (novoStatus === StatusOcorrencia.EM_ATENDIMENTO) {
+        throw new RegraDeNegocioError(
+            `R2: uma ocorrência só pode passar para EM_ATENDIMENTO se estiver ABERTA (status atual: ${ocorrencia.status}).`
+        );
+      }
+
+      if (novoStatus === StatusOcorrencia.CONCLUIDA) {
+        throw new RegraDeNegocioError(
+            `R3: Uma ocorrência só pode passar para CONCLUIDA se estiver EM_ATENDIMENTO (status atual: ${ocorrencia.status}).`
+        );
+      }
+
       throw new RegraDeNegocioError(
-        `Transição de status inválida: não é permitido mudar de '${ocorrencia.status}' para '${novoStatus}'.`
+          `Transição de status inválida: não é permitido mudar de '${ocorrencia.status}' para '${novoStatus}'.`
       );
     }
 
@@ -74,3 +86,4 @@ export class OcorrenciaService {
     return this.ocorrenciaMapper.paraResposta(atualizada);
   }
 }
+
