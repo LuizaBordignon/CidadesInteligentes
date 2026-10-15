@@ -5,7 +5,7 @@
   "description": "Projeto Cidades Inteligentes - Backend",
   "main": "src/server.js",
   "scripts": {
-    "dev": "node --watch src/server.js",
+    "dev": "npm run migration:run && node --watch src/server.js",
     "typeorm": "typeorm",
     "migration:run": "typeorm migration:run -d src/config/datasource.js",
     "migration:generate": "typeorm migration:generate -d src/config/datasource.js"
