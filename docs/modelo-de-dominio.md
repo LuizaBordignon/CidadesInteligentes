@@ -10,7 +10,7 @@
 
 ## Diagrama das tabelas
 
-    ```mermaid
+```mermaid
 erDiagram
     CATEGORIAS ||--o{ OCORRENCIAS : classifica
     EQUIPES |o--o{ OCORRENCIAS : atende
