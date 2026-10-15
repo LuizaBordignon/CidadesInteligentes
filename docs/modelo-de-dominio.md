@@ -68,7 +68,7 @@ erDiagram
 
 ## Ciclo de vida da ocorrência
 
-    ```
+```text
 ABERTA  →  EM_ATENDIMENTO  →  CONCLUIDA
 ```
 
@@ -79,7 +79,7 @@ Não se pula etapa e não se volta atrás. `CONCLUIDA` é estado final.
 
 A migration V3 cria um índice único parcial:
 
-    ```sql
+```sql
 CREATE UNIQUE INDEX ux_ocorrencias_aberta_endereco_categoria
   ON ocorrencias (categoria_id, LOWER(TRIM(endereco)))
   WHERE status = 'ABERTA'
