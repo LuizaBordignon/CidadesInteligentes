@@ -1,3 +1,9 @@
+// CAMADA: Repository
+// RESPONSABILIDADE: Comunicar-se com o banco de dados para salvar e buscar equipes.
+// REGRAS: Nenhuma regra de negócio nesta classe, apenas acesso a dados.
+// ROTAS ATENDIDAS: Nenhuma diretamente.
+// SITUAÇÃO: implementada.
+
 export class EquipeRepository {
     constructor(dataSource) {
         this.repository = dataSource.getRepository("Equipe");

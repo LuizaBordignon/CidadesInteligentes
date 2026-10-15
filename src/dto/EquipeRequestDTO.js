@@ -1,3 +1,9 @@
+// CAMADA: DTO
+// RESPONSABILIDADE: Definir e validar o formato dos dados enviados pelo cliente nas rotas de equipe.
+// REGRAS: O nome é obrigatório; a descrição é opcional.
+// ROTAS ATENDIDAS: POST /equipes (planejada).
+// SITUAÇÃO: implementada.
+
 import { z } from "zod";
 
 export const EquipeRequestSchema = z.object({
