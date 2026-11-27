@@ -4,6 +4,8 @@
 // ROTAS ATENDIDAS: Nenhuma diretamente.
 // SITUAÇÃO: implementada.
 
+import { ILike } from "typeorm";
+
 export class EquipeRepository {
     constructor(dataSource) {
         this.repository = dataSource.getRepository("Equipe");
@@ -14,8 +16,22 @@ export class EquipeRepository {
         return await this.repository.save(equipe);
     }
 
-    async listar() {
-        return await this.repository.find();
+    async listar({ nome, page, limit, sort, order }) {
+        const [itens, total] = await this.repository.findAndCount({
+            where: nome ? { nome: ILike(`%${nome}%`) } : {},
+            order: { [sort]: order },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+        return { itens, total };
+    }
+
+    async salvar(equipe) {
+        return await this.repository.save(equipe);
+    }
+
+    async remover(id) {
+        await this.repository.delete({ id });
     }
 
     async buscarPorId(id) {

@@ -4,6 +4,8 @@
 // ROTAS ATENDIDAS: Nenhuma diretamente.
 // SITUAÇÃO: implementada.
 
+import { ILike } from "typeorm";
+
 export class OcorrenciaRepository {
   constructor(dataSource) {
     this.repository = dataSource.getRepository('Ocorrencia');
@@ -21,10 +23,52 @@ export class OcorrenciaRepository {
     });
   }
 
-  async listar() {
-    return await this.repository.find({
-      relations: ["categoria"]
+  async listar({ status, categoria_id, endereco, page, limit, sort, order }) {
+    const where = {};
+    if (status) where.status = status;
+    if (categoria_id) where.categoria_id = categoria_id;
+    if (endereco) where.endereco = ILike(`%${endereco}%`);
+
+    const [itens, total] = await this.repository.findAndCount({
+      where,
+      relations: ["categoria"],
+      order: { [sort]: order },
+      skip: (page - 1) * limit,
+      take: limit,
     });
+    return { itens, total };
+  }
+
+  async remover(id) {
+    await this.repository.delete({ id });
+  }
+
+  async contarPorStatus() {
+    const linhas = await this.repository
+      .createQueryBuilder("o")
+      .select("o.status", "status")
+      .addSelect("COUNT(*)", "total")
+      .groupBy("o.status")
+      .getRawMany();
+    return linhas.map((l) => ({ status: l.status, total: Number(l.total) }));
+  }
+
+  async contarPorCategoria() {
+    const linhas = await this.repository
+      .createQueryBuilder("o")
+      .innerJoin("o.categoria", "c")
+      .select("c.id", "categoria_id")
+      .addSelect("c.nome", "categoria")
+      .addSelect("COUNT(*)", "total")
+      .groupBy("c.id")
+      .addGroupBy("c.nome")
+      .orderBy("c.id", "ASC")
+      .getRawMany();
+    return linhas.map((l) => ({
+      categoria_id: l.categoria_id,
+      categoria: l.categoria,
+      total: Number(l.total),
+    }));
   }
 
   async buscarAbertaPorEnderecoECategoria(endereco, categoriaId) {

@@ -8,6 +8,7 @@ import { ErroDTO } from "../dto/ErroDTO.js";
 import { RegraDeNegocioError } from "../service/RegraDeNegocioError.js";
 import { RecursoNaoEncontradoError } from "../service/RecursoNaoEncontradoError.js";
 import { ZodError } from "zod";
+import { logger } from "../config/logger.js";
 
 export function ApiExceptionHandler(err, req, res, next) {
   const path = req.originalUrl;
@@ -40,7 +41,7 @@ export function ApiExceptionHandler(err, req, res, next) {
   }
 
   // 4. Qualquer outro erro inesperado (vira 500, sem vazar detalhes internos)
-  console.error("Erro interno não tratado:", err);
+  logger.error({ err, path }, "Erro interno não tratado");
   const erroDTO = new ErroDTO(500, "Erro Interno do Servidor", "Ocorreu um erro interno no servidor.", path);
   return res.status(500).json(erroDTO);
 }

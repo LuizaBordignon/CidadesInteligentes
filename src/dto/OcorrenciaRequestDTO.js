@@ -1,11 +1,12 @@
 // CAMADA: DTO
 // RESPONSABILIDADE: Definir e validar o formato dos dados enviados pelo cliente nas rotas de ocorrência.
 // REGRAS: Campos obrigatórios preenchidos; o status NÃO é aceito na criação (regra R1: a ocorrência nasce ABERTA).
-// ROTAS ATENDIDAS: POST /ocorrencias, GET /ocorrencias/:id, PATCH /ocorrencias/:id/status
+// ROTAS ATENDIDAS: POST /ocorrencias, PUT /ocorrencias/:id, GET /ocorrencias (filtros), GET /ocorrencias/:id, PATCH /ocorrencias/:id/status
 // SITUAÇÃO: implementada.
 
 import { z } from "zod";
 import { StatusOcorrencia } from "../model/StatusOcorrencia.js";
+import { paginacaoSchema } from "./PaginacaoDTO.js";
 
 const textoObrigatorio = (nomeDoCampo, tamanhoMaximo) =>
   z
@@ -50,4 +51,10 @@ export const OcorrenciaStatusRequestSchema = z.object({
     invalid_type_error: "O status deve ser um texto.",
     message: `O status deve ser um destes: ${Object.values(StatusOcorrencia).join(", ")}.`,
   }),
+});
+
+export const OcorrenciaFiltroSchema = paginacaoSchema(["id", "titulo", "status", "data_criacao"]).extend({
+  status: z.enum(Object.values(StatusOcorrencia)).optional(),
+  categoria_id: z.coerce.number().int().positive().optional(),
+  endereco: z.string().trim().min(1).optional(),
 });
