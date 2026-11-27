@@ -8,7 +8,9 @@
     "dev": "npm run migration:run && node --watch src/server.js",
     "typeorm": "typeorm",
     "migration:run": "typeorm migration:run -d src/config/datasource.js",
-    "migration:generate": "typeorm migration:generate -d src/config/datasource.js"
+    "migration:generate": "typeorm migration:generate -d src/config/datasource.js",
+    "start": "node src/server.js",
+    "test": "node --test"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
