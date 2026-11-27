@@ -1,11 +1,11 @@
 // CAMADA: Controller
 // RESPONSABILIDADE: Gerenciar os endpoints HTTP para o recurso de categorias.
 // REGRAS: Validação de entrada via Zod e tratamento de erros via next().
-// ROTAS ATENDIDAS: POST /categorias, GET /categorias, GET /categorias/:id
+// ROTAS ATENDIDAS: POST /categorias, GET /categorias, GET /categorias/:id, PUT /categorias/:id, DELETE /categorias/:id
 // SITUAÇÃO: implementada.
 
 import { Router } from "express";
-import { CategoriaRequestSchema, CategoriaIdSchema } from "../dto/CategoriaRequestDTO.js";
+import { CategoriaRequestSchema, CategoriaIdSchema, CategoriaFiltroSchema } from "../dto/CategoriaRequestDTO.js";
 
 export class CategoriaController {
   constructor(categoriaService) {
@@ -30,7 +30,8 @@ export class CategoriaController {
     // GET /categorias
     this.router.get("/", async (req, res, next) => {
       try {
-        const categorias = await this.categoriaService.listar();
+        const filtros = CategoriaFiltroSchema.parse(req.query);
+        const categorias = await this.categoriaService.listar(filtros);
         return res.json(categorias);
       } catch (error) {
         next(error);
@@ -43,6 +44,29 @@ export class CategoriaController {
         const id = CategoriaIdSchema.parse(req.params.id);
         const categoria = await this.categoriaService.buscarPorId(id);
         return res.json(categoria);
+      } catch (error) {
+        next(error);
+      }
+    });
+
+    // PUT /categorias/:id
+    this.router.put("/:id", async (req, res, next) => {
+      try {
+        const id = CategoriaIdSchema.parse(req.params.id);
+        const dadosValidados = CategoriaRequestSchema.parse(req.body);
+        const categoria = await this.categoriaService.atualizar(id, dadosValidados);
+        return res.json(categoria);
+      } catch (error) {
+        next(error);
+      }
+    });
+
+    // DELETE /categorias/:id
+    this.router.delete("/:id", async (req, res, next) => {
+      try {
+        const id = CategoriaIdSchema.parse(req.params.id);
+        await this.categoriaService.remover(id);
+        return res.status(204).send();
       } catch (error) {
         next(error);
       }

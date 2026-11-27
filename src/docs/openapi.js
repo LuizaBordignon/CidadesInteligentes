@@ -1,13 +1,31 @@
 // CAMADA: Documentação
 // RESPONSABILIDADE: Descrever o contrato da API (OpenAPI 3) exibido no Swagger UI.
 // REGRAS: Nenhuma lógica de negócio aqui, apenas a descrição das rotas.
-// ROTAS ATENDIDAS: /ocorrencias (POST, GET, GET /{id}, PATCH /{id}/status) e /categorias (POST, GET, GET /{id}).
+// ROTAS ATENDIDAS: /ocorrencias, /categorias e /equipes (CRUD, listagem paginada com filtros) e /ocorrencias/estatisticas.
 // SITUAÇÃO: implementada.
 
 const json = (schema) => ({ 'application/json': { schema } });
 const ref = (nome) => ({ $ref: `#/components/schemas/${nome}` });
 const erro = (descricao) => ({ description: descricao, content: json(ref('Erro')) });
 const idNoCaminho = { name: 'id', in: 'path', required: true, schema: { type: 'integer', example: 1 } };
+const parametrosPaginacao = (camposOrdenaveis) => [
+  { name: 'page', in: 'query', schema: { type: 'integer', minimum: 1, default: 1 } },
+  { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 } },
+  { name: 'sort', in: 'query', schema: { type: 'string', enum: camposOrdenaveis, default: 'id' } },
+  { name: 'order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'], default: 'asc' } },
+];
+const filtroNome = { name: 'nome', in: 'query', schema: { type: 'string' }, description: 'Busca parcial, sem diferenciar maiúsculas.' };
+const pagina = (schema) => json({
+  type: 'object',
+  properties: {
+    conteudo: { type: 'array', items: schema },
+    pagina: { type: 'integer', example: 1 },
+    limite: { type: 'integer', example: 10 },
+    total: { type: 'integer', example: 25 },
+    totalPaginas: { type: 'integer', example: 3 },
+  },
+});
+const semConteudo = { 204: { description: 'Excluído' } };
 
 export const openapi = {
   openapi: '3.0.3',
@@ -17,14 +35,21 @@ export const openapi = {
     description: 'API para registrar, categorizar e acompanhar ocorrências urbanas.',
   },
   servers: [{ url: 'http://localhost:8080' }],
-  tags: [{ name: 'Ocorrências' }, { name: 'Categorias' }],
+  tags: [{ name: 'Ocorrências' }, { name: 'Categorias' }, { name: 'Equipes' }],
   paths: {
     '/ocorrencias': {
       get: {
         tags: ['Ocorrências'],
-        summary: 'Lista as ocorrências',
+        summary: 'Lista as ocorrências (paginada, com filtros)',
+        parameters: [
+          ...parametrosPaginacao(['id', 'titulo', 'status', 'data_criacao']),
+          { name: 'status', in: 'query', schema: ref('Status') },
+          { name: 'categoria_id', in: 'query', schema: { type: 'integer' } },
+          { name: 'endereco', in: 'query', schema: { type: 'string' }, description: 'Busca parcial, sem diferenciar maiúsculas.' },
+        ],
         responses: {
-          200: { description: 'Lista de ocorrências', content: json({ type: 'array', items: ref('OcorrenciaResponse') }) },
+          200: { description: 'Página de ocorrências', content: pagina(ref('OcorrenciaResponse')) },
+          400: erro('Parâmetro de consulta inválido'),
         },
       },
       post: {
@@ -38,6 +63,38 @@ export const openapi = {
         },
       },
     },
+    '/ocorrencias/estatisticas': {
+      get: {
+        tags: ['Ocorrências'],
+        summary: 'Estatísticas: total, contagem por status e por categoria',
+        responses: {
+          200: {
+            description: 'Agregações das ocorrências',
+            content: json({
+              type: 'object',
+              properties: {
+                total: { type: 'integer', example: 2 },
+                por_status: {
+                  type: 'array',
+                  items: { type: 'object', properties: { status: ref('Status'), total: { type: 'integer', example: 1 } } },
+                },
+                por_categoria: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      categoria_id: { type: 'integer', example: 1 },
+                      categoria: { type: 'string', example: 'Iluminação pública' },
+                      total: { type: 'integer', example: 1 },
+                    },
+                  },
+                },
+              },
+            }),
+          },
+        },
+      },
+    },
     '/ocorrencias/{id}': {
       get: {
         tags: ['Ocorrências'],
@@ -48,6 +105,23 @@ export const openapi = {
           400: erro('Id inválido'),
           404: erro('Ocorrência não encontrada'),
         },
+      },
+      put: {
+        tags: ['Ocorrências'],
+        summary: 'Atualiza os dados da ocorrência (não altera o status; R4 vale para ocorrências ABERTAS)',
+        parameters: [idNoCaminho],
+        requestBody: { required: true, content: json(ref('OcorrenciaRequest')) },
+        responses: {
+          200: { description: 'Ocorrência atualizada', content: json(ref('OcorrenciaResponse')) },
+          400: erro('Campo inválido ou regra R4 violada'),
+          404: erro('Ocorrência ou categoria não encontrada'),
+        },
+      },
+      delete: {
+        tags: ['Ocorrências'],
+        summary: 'Exclui a ocorrência',
+        parameters: [idNoCaminho],
+        responses: { ...semConteudo, 400: erro('Id inválido'), 404: erro('Ocorrência não encontrada') },
       },
     },
     '/ocorrencias/{id}/status': {
@@ -69,9 +143,11 @@ export const openapi = {
     '/categorias': {
       get: {
         tags: ['Categorias'],
-        summary: 'Lista as categorias',
+        summary: 'Lista as categorias (paginada, com filtro por nome)',
+        parameters: [...parametrosPaginacao(['id', 'nome']), filtroNome],
         responses: {
-          200: { description: 'Lista de categorias', content: json({ type: 'array', items: ref('Categoria') }) },
+          200: { description: 'Página de categorias', content: pagina(ref('Categoria')) },
+          400: erro('Parâmetro de consulta inválido'),
         },
       },
       post: {
@@ -94,6 +170,72 @@ export const openapi = {
           404: erro('Categoria não encontrada'),
         },
       },
+      put: {
+        tags: ['Categorias'],
+        summary: 'Atualiza o nome da categoria',
+        parameters: [idNoCaminho],
+        requestBody: { required: true, content: json(ref('CategoriaRequest')) },
+        responses: {
+          200: { description: 'Categoria atualizada', content: json(ref('Categoria')) },
+          400: erro('Nome inválido ou já existente'),
+          404: erro('Categoria não encontrada'),
+        },
+      },
+      delete: {
+        tags: ['Categorias'],
+        summary: 'Exclui a categoria (recusada se tiver ocorrências)',
+        parameters: [idNoCaminho],
+        responses: { ...semConteudo, 400: erro('Id inválido ou categoria com ocorrências'), 404: erro('Categoria não encontrada') },
+      },
+    },
+    '/equipes': {
+      get: {
+        tags: ['Equipes'],
+        summary: 'Lista as equipes (paginada, com filtro por nome)',
+        parameters: [...parametrosPaginacao(['id', 'nome']), filtroNome],
+        responses: {
+          200: { description: 'Página de equipes', content: pagina(ref('Equipe')) },
+          400: erro('Parâmetro de consulta inválido'),
+        },
+      },
+      post: {
+        tags: ['Equipes'],
+        summary: 'Cadastra uma equipe',
+        requestBody: { required: true, content: json(ref('EquipeRequest')) },
+        responses: {
+          201: { description: 'Equipe criada', content: json(ref('Equipe')) },
+          400: erro('Campo inválido ou equipe já existente'),
+        },
+      },
+    },
+    '/equipes/{id}': {
+      get: {
+        tags: ['Equipes'],
+        summary: 'Consulta uma equipe',
+        parameters: [idNoCaminho],
+        responses: {
+          200: { description: 'Equipe encontrada', content: json(ref('Equipe')) },
+          400: erro('Id inválido'),
+          404: erro('Equipe não encontrada'),
+        },
+      },
+      put: {
+        tags: ['Equipes'],
+        summary: 'Atualiza uma equipe',
+        parameters: [idNoCaminho],
+        requestBody: { required: true, content: json(ref('EquipeRequest')) },
+        responses: {
+          200: { description: 'Equipe atualizada', content: json(ref('Equipe')) },
+          400: erro('Campo inválido ou nome já existente'),
+          404: erro('Equipe não encontrada'),
+        },
+      },
+      delete: {
+        tags: ['Equipes'],
+        summary: 'Exclui uma equipe',
+        parameters: [idNoCaminho],
+        responses: { ...semConteudo, 400: erro('Id inválido'), 404: erro('Equipe não encontrada') },
+      },
     },
   },
   components: {
@@ -107,6 +249,22 @@ export const openapi = {
         type: 'object',
         required: ['nome'],
         properties: { nome: { type: 'string', example: 'Iluminação pública' } },
+      },
+      Equipe: {
+        type: 'object',
+        properties: {
+          id: { type: 'integer', example: 1 },
+          nome: { type: 'string', example: 'Equipe Elétrica' },
+          descricao: { type: 'string', nullable: true, example: 'Manutenção de iluminação' },
+        },
+      },
+      EquipeRequest: {
+        type: 'object',
+        required: ['nome'],
+        properties: {
+          nome: { type: 'string', maxLength: 100, example: 'Equipe Elétrica' },
+          descricao: { type: 'string', maxLength: 255, example: 'Manutenção de iluminação' },
+        },
       },
       OcorrenciaRequest: {
         type: 'object',

@@ -4,11 +4,13 @@
 // ROTAS ATENDIDAS: Nenhuma diretamente.
 // SITUAÇÃO: implementada.
 
+import { ILike } from "typeorm";
 import { CategoriaSchema } from "../model/Categoria.js";
 
 export class CategoriaRepository {
   constructor(dataSource) {
     this.repository = dataSource.getRepository(CategoriaSchema);
+    this.ocorrenciaRepository = dataSource.getRepository("Ocorrencia");
   }
 
   async criar(categoriaData) {
@@ -16,8 +18,26 @@ export class CategoriaRepository {
     return await this.repository.save(categoria);
   }
 
-  async listar() {
-    return await this.repository.find();
+  async listar({ nome, page, limit, sort, order }) {
+    const [itens, total] = await this.repository.findAndCount({
+      where: nome ? { nome: ILike(`%${nome}%`) } : {},
+      order: { [sort]: order },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { itens, total };
+  }
+
+  async salvar(categoria) {
+    return await this.repository.save(categoria);
+  }
+
+  async remover(id) {
+    await this.repository.delete({ id });
+  }
+
+  async contarOcorrencias(id) {
+    return await this.ocorrenciaRepository.count({ where: { categoria_id: id } });
   }
 
   async buscarPorId(id) {

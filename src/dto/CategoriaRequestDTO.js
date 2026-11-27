@@ -1,10 +1,11 @@
 // CAMADA: DTO
 // RESPONSABILIDADE: Validar e estruturar os dados enviados pelo cliente ao criar uma categoria.
 // REGRAS: O campo nome é obrigatório.
-// ROTAS ATENDIDAS: POST /categorias
+// ROTAS ATENDIDAS: POST /categorias, PUT /categorias/:id, GET /categorias (filtros)
 // SITUAÇÃO: implementada.
 
 import { z } from "zod";
+import { paginacaoSchema } from "./PaginacaoDTO.js";
 
 export const CategoriaRequestSchema = z.object({
   nome: z.string({
@@ -17,3 +18,7 @@ export const CategoriaIdSchema = z.coerce
   .number({ invalid_type_error: "O id deve ser um número." })
   .int("O id deve ser um número inteiro.")
   .positive("O id deve ser positivo.");
+
+export const CategoriaFiltroSchema = paginacaoSchema(["id", "nome"]).extend({
+  nome: z.string().trim().min(1).optional(),
+});
